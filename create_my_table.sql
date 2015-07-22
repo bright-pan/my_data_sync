@@ -1,4 +1,4 @@
-drop table my_kf, my_qy, my_rc, my_rg;my_kf
+drop table my_kf, my_qy, my_rc, my_rg;
 CREATE TABLE `my_kf` (
   `v_rownum` int(11) NOT NULL,
   `ProjName` varchar(400) DEFAULT NULL,
