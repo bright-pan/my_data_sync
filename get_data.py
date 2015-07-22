@@ -54,11 +54,12 @@ kf_parameters = {
     'key' : "A9EAA88BF63D3F0DC7F454F74D8BC06E",
     'table_name':"my_kf",
 }
+db_name = 'test'
 
 #利用urllib2获取网络数据
 class ProcessData(object):
     def __init__(self):
-        self.db = DB(db="test", charset="utf8")
+        self.db = DB(db=db_name, charset="utf8")
 
     def process(self, parameters):
         #从网络上获取数据
@@ -82,41 +83,7 @@ class ProcessData(object):
     def __del__(self):
         del self.db
 
-def registerUrl():
-    try:
-        url = "http://api.seedland.cc/ws/json?key=9C9F73DC8D821F4861D0D0C2038F2CB1&token=DBA7AEF165F514232423999B6B81EA63"
-        data = urllib.request.urlopen(url).read().decode('utf-8')
-        return data
-    except Exception as e:
-        print(e)
-
-#写入文件
-def jsonFile(fileData):
-    file = open("d:\json.txt","w")
-    file.write(fileData)
-    file.close()
-
-#解析从网络上获取的JSON数据
-def praserJsonFile(jsonData):
-    j_value = json.loads(jsonData)[0:10]
-    print(duan)
-    for value in j_value:
-        print (value)
-        print (duan)
-    return j_value
-
-
-
 if __name__ == "__main__":
-    # xinput = raw_input()
-    # x = 130
-    # xvalue = cmp(x,xinput)
-    # print xvalue
-    # print x/100.0
-    # db = DB(db="test", charset="utf8")
-    # data = registerUrl()
-    # jsonFile(data)
-    # db.insert_my_rc(praserJsonFile(data))
     pd = ProcessData()
     pd.process(rc_parameters)
     pd.process(rg_parameters)
