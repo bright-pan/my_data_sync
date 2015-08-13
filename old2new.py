@@ -216,7 +216,7 @@ if __name__ == "__main__":
     db.process_insert(from_table,to_table,map_dict)
     from_table = "yehnet_customer"
     to_table = "yehnet_customer_project"
-    map_dict = {"id":(0,"c_id"), "uid":(0,"u_id"),"cate_id":(0,"p_id"),
+    map_dict = {"id":(0,"c_id"), "uid":(0,"u_id"),"yehnet_list.id":(0,"p_id"),
                 "wanted":(0,"apartment"),"housetype":(0,"housetype"),
                 "housesquare":(0,"housesquare"),"housefloor":(0,"housefloor"),
                 "other":(0,"other"), "status":(2,"status",1), "add_time":(3,"add_time")}
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     db.process_insert(from_table,to_table,map_dict, "left JOIN yehnet_list ON yehnet_list.title = yehnet_customer.proname")
     from_table = "yehnet_customer_log"
     to_table = "yehnet_customer_status"
-    map_dict = {"yehnet_customer.id":(0,"c_id"), "uid":(0,"u_id"), "guwenid":(0,"a_id"),"cate_id":(0,"p_id"), "type":(0,"type"), "note":(0,"remark"),"yehnet_customer.status":(0,"status"), "add_time":(1,"add_time")}
+    map_dict = {"yehnet_customer.id":(0,"c_id"), "uid":(0,"u_id"), "guwenid":(0,"a_id"),"yehnet_list.id":(0,"p_id"), "type":(0,"type"), "note":(0,"remark"),"yehnet_customer.status":(0,"status"), "add_time":(1,"add_time")}
     db.process_insert(from_table,to_table,map_dict, "left JOIN yehnet_customer ON yehnet_customer_log.customer_id = yehnet_customer.id left JOIN yehnet_list ON yehnet_list.title = yehnet_customer.proname")
     #db.db_copy_process()
     #db.db_commit()

@@ -36,7 +36,7 @@ class DB(object):
     def __del__(self):
         self.conn.close()
 
-url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s"
+url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1"
 api_token = "DBA7AEF165F514232423999B6B81EA63";
 rc_parameters = {
     'key' : "9C9F73DC8D821F4861D0D0C2038F2CB1",
@@ -66,6 +66,7 @@ class ProcessData(object):
         try:
             url = url_template % (parameters['key'], api_token)
             self.data = urllib.request.urlopen(url).read().decode('utf-8')
+            self.data = self.data
         except Exception as e:
             print(e)
         #写入文件
@@ -78,14 +79,14 @@ class ProcessData(object):
         for value in self.j_data[0:5]:
             print (value)
             print (duan)
-        self.db.insert_data(self.j_data,table_name=parameters['table_name'])
+        self.db.insert_data(self.j_data[0:5],table_name=parameters['table_name'])
 
     def __del__(self):
         del self.db
 
 if __name__ == "__main__":
     pd = ProcessData()
-    pd.process(rc_parameters)
-    pd.process(rg_parameters)
-    pd.process(qy_parameters)
+    #pd.process(rc_parameters)
+    #pd.process(rg_parameters)
+    #pd.process(qy_parameters)
     pd.process(kf_parameters)
