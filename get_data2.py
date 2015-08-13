@@ -161,7 +161,7 @@ class DB(object):
                     #     sql += "`%s` = \"%s\"," % (key, value)
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
             try:
-                #print(sql)
+                print(sql)
                 self.cur.execute(sql)
             except pymysql.err.IntegrityError as e:
                 print(e)
@@ -186,7 +186,7 @@ rg_parameters = {
     'key' : "947A80532AD54B83F7674B8B7AAAF436",
     "type":3,
     'table_name':"yehnet_customer_status",
-    'map_dict' : {"ProjName":(2,"type",3), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"ProjName":(41,"add_time","QSDate"),
+    'map_dict' : {"v_rownum":(2,"type",3), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"ProjName":(41,"add_time","QSDate"),
                   "OrderGUID":(0,"OrderGUID"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"TradeGUID":(0,"TradeGUID"),
                   "RoomGUID":(0,"RoomGUID"),"Roominfo":(0,"Roominfo"),"BldName":(0,"BldName"),"Roominfo":(0,"Roominfo"),"Room":(0,"Room"),"BldArea":(0,"BldArea"),
                   "TnArea":(0,"TnArea"),"PayformName":(0,"PayformName"),"QSDate":(4,"QSDate"),"CjTotal":(0,"CjTotal"),"OrderType":(0,"OrderType"),"CloseReason":(0,"CloseReason")}
@@ -195,7 +195,7 @@ qy_parameters = {
     'key' : "654A7B61CAACC62BC4770ABC8BB7DA56",
     "type":4,
     'table_name':"yehnet_customer_status",
-    'map_dict' : {"ProjName":(2,"type",4), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"ProjName":(41,"add_time","QSDate"),
+    'map_dict' : {"v_rownum":(2,"type",4), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"ProjName":(41,"add_time","QSDate"),
                   "ContractGUID":(0,"ContractGUID"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"TradeGUID":(0,"TradeGUID"),
                   "RoomGUID":(0,"RoomGUID"),"Roominfo":(0,"Roominfo"),"BldName":(0,"BldName"),"Roominfo":(0,"Roominfo"),"Room":(0,"Room"),"BldArea":(0,"BldArea"),
                   "TnArea":(0,"TnArea"),"PayformName":(0,"PayformName"),"QSDate":(4,"QSDate"),"HtTotal":(0,"HtTotal"),"CloseReason":(0,"CloseReason")}
@@ -232,7 +232,7 @@ class ProcessData(object):
         #self.j_data = [{'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '73D5F2CC-A741-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': '76D5F2CC-A741-E511-B354-90B11C289D6E', 'UserGUID': '9C0A03BD-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '13984486605', 'v_rownum': 1, 'Status': '问询', 'UserName': '黄勇勇', 'CstName': '段姐', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 410000000, 'minutes': 41, 'time': 1439462476410, 'seconds': 16, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '6AC7EEA5-A741-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': '6DC7EEA5-A741-E511-B354-90B11C289D6E', 'UserGUID': '9C0A03BD-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '18748600982', 'v_rownum': 2, 'Status': '问询', 'UserName': '黄勇勇', 'CstName': '哥', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 400000000, 'minutes': 40, 'time': 1439462403400, 'seconds': 3, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': 'AD72A76E-A741-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': 'B072A76E-A741-E511-B354-90B11C289D6E', 'UserGUID': '9C0A03BD-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '15984422998', 'v_rownum': 3, 'Status': '问询', 'UserName': '黄勇勇', 'CstName': '马哥', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 380000000, 'minutes': 38, 'time': 1439462310380, 'seconds': 30, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '17137349-A641-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': '1A137349-A641-E511-B354-90B11C289D6E', 'UserGUID': '46EF95D9-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '15086451161', 'v_rownum': 4, 'Status': '问询', 'UserName': '周丽琴', 'CstName': '张姐', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 300000000, 'minutes': 30, 'time': 1439461825300, 'seconds': 25, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '9EE66975-A241-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': 'A1E66975-A241-E511-B354-90B11C289D6E', 'UserGUID': '49B9070D-BD01-E411-9B75-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '18748750678', 'v_rownum': 5, 'Status': '问询', 'UserName': '何彦学', 'CstName': '夏姐', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 20000000, 'minutes': 2, 'time': 1439460174020, 'seconds': 54, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}]
         #self.j_data = self.j_data[0:5]
         print(duan)
-        for value in self.j_data:
+        for value in self.j_data[0:5]:
             print (value)
             print (duan)
 
@@ -247,8 +247,8 @@ class ProcessData(object):
 if __name__ == "__main__":
     pd = ProcessData()
     url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2010-08-06&endDate=2015-8-10"
-    #pd.process(rc_parameters)
-    #pd.process(qy_parameters)
+    pd.process(rc_parameters)
+    pd.process(qy_parameters)
     url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1"
-    #pd.process(rg_parameters)
-    pd.process(kf_parameters)
+    pd.process(rg_parameters)
+    #pd.process(kf_parameters)
