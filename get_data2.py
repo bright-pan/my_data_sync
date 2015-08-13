@@ -70,14 +70,14 @@ class DB(object):
                         # else:
                         #     sql += "`%s` = \"%s\"," % (key, value)
                 sql = sql[:-1] + (" where id = %d" % result['id'])
-                try:
-                    #print(sql)
-                    self.cur.execute(sql)
-                except pymysql.err.IntegrityError as e:
-                    print(e)
-                    #print(sql)
-                except pymysql.err.ProgrammingError as e: #捕捉除0异常
-                    print(e)
+                # try:
+                #     #print(sql)
+                #     self.cur.execute(sql)
+                # except pymysql.err.IntegrityError as e:
+                #     print(e)
+                #     #print(sql)
+                # except pymysql.err.ProgrammingError as e: #捕捉除0异常
+                #     print(e)
             else:
 
                 #print(list(map(f,list(each.keys()))))
@@ -110,14 +110,14 @@ class DB(object):
                         # else:
                         #     sql += "`%s` = \"%s\"," % (key, value)
                 sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
-                try:
-                    #print(sql)
-                    self.cur.execute(sql)
-                except pymysql.err.IntegrityError as e:
-                    print(e)
-                    #print(sql)
-                except pymysql.err.ProgrammingError as e: #捕捉除0异常
-                    print(e)
+            try:
+                print(sql)
+                self.cur.execute(sql)
+            except pymysql.err.IntegrityError as e:
+                print(e)
+                #print(sql)
+            except pymysql.err.ProgrammingError as e: #捕捉除0异常
+                print(e)
         self.conn.commit()
     def insert_status_data(self, data, to_table = "", map_dict={}, s_type=0):
         self.cur.execute("delete from %s where type = %d" % (to_table, s_type))
@@ -206,7 +206,7 @@ kf_parameters = {
     'table_name':"yehnet_customer",
     'map_dict' : {"HomeTel":(0,"hometel"), "MobileTel":(0,"cellphone"), "OfficeTel":(0,"officetel"), "CstName":(0,"username"), "CstGUID":(0,"CstGUID"),"Status":(0,"Status"),
                   "CreatedOn":(4,"add_time"),"ProjName":(0,"ProjName"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"OppGUID":(0,"OppGUID"),
-                  "UserGUID":(0,"UserGUID"),"UserName":(0,"UserName")}
+                  "UserGUID":(0,"UserGUID"),"UserName":(0,"GWName")}
 }
 db_name = 'test'
 
@@ -247,8 +247,8 @@ class ProcessData(object):
 if __name__ == "__main__":
     pd = ProcessData()
     url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2010-08-06&endDate=2015-8-10"
-    pd.process(rc_parameters)
-    pd.process(qy_parameters)
+    #pd.process(rc_parameters)
+    #pd.process(qy_parameters)
     url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1"
-    pd.process(rg_parameters)
+    #pd.process(rg_parameters)
     pd.process(kf_parameters)
