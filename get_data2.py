@@ -9,6 +9,7 @@ except Exception:
     import json
 import pymysql
 import datetime
+from timeit import Timer
 duan ="--------------------------"	#在控制台断行区别的
 
 class DB(object):
@@ -36,13 +37,20 @@ class DB(object):
 
     def insert_user_data(self, data, to_table = "", map_dict={}):
         #self.cur.execute("delete from %s" % table_name)
+        self.cur.execute("select * from %s" % (to_table))
+        result = self.cur.fetchall()
+        temp = {}
+        if result:
+            for each in result:
+                 temp[each['cellphone']] = each['id']
+
         for each in data:
             #sql = "update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName'])UserGUID
 
             self.cur.execute("update yehnet_admin set `UserGUID` =  \"%s\" where username LIKE \"%%%s%%\"" % (each['UserGUID'], each['UserName']))
             self.cur.execute("update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName']))
-            if self.cur.execute("select * from %s where cellphone LIKE \"%%%s%%\"" % (to_table, each['MobileTel'])):
-                result = self.cur.fetchone()
+            result = temp.get(each['MobileTel'], None)
+            if result:
                 sql = "update %s set " % to_table
                 for from_cols, to_cols in map_dict.items():
                     #print(from_cols,to_cols)
@@ -69,7 +77,7 @@ class DB(object):
                         #     sql += "`%s` = \"%s\"," % (key, pymysql.escape_string(value))
                         # else:
                         #     sql += "`%s` = \"%s\"," % (key, value)
-                sql = sql[:-1] + (" where id = %d" % result['id'])
+                sql = sql[:-1] + (" where id = %d" % result)
                 # try:
                 #     #print(sql)
                 #     self.cur.execute(sql)
@@ -111,7 +119,7 @@ class DB(object):
                         #     sql += "`%s` = \"%s\"," % (key, value)
                 sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
             try:
-                print(sql)
+                # print(sql)
                 self.cur.execute(sql)
             except pymysql.err.IntegrityError as e:
                 print(e)
@@ -161,7 +169,7 @@ class DB(object):
                     #     sql += "`%s` = \"%s\"," % (key, value)
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
             try:
-                print(sql)
+                # print(sql)
                 self.cur.execute(sql)
             except pymysql.err.IntegrityError as e:
                 print(e)
@@ -219,8 +227,9 @@ class ProcessData(object):
         #从网络上获取数据
         try:
             url = url_template % (parameters['key'], api_token)
+            # print(url)
             self.data = urllib.request.urlopen(url).read().decode('utf-8')
-            print(self.data[0:100])
+            # print(len(self.data[0)
         except Exception as e:
             print(e)
         # #写入文件
@@ -232,6 +241,8 @@ class ProcessData(object):
         #self.j_data = [{'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '73D5F2CC-A741-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': '76D5F2CC-A741-E511-B354-90B11C289D6E', 'UserGUID': '9C0A03BD-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '13984486605', 'v_rownum': 1, 'Status': '问询', 'UserName': '黄勇勇', 'CstName': '段姐', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 410000000, 'minutes': 41, 'time': 1439462476410, 'seconds': 16, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '6AC7EEA5-A741-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': '6DC7EEA5-A741-E511-B354-90B11C289D6E', 'UserGUID': '9C0A03BD-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '18748600982', 'v_rownum': 2, 'Status': '问询', 'UserName': '黄勇勇', 'CstName': '哥', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 400000000, 'minutes': 40, 'time': 1439462403400, 'seconds': 3, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': 'AD72A76E-A741-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': 'B072A76E-A741-E511-B354-90B11C289D6E', 'UserGUID': '9C0A03BD-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '15984422998', 'v_rownum': 3, 'Status': '问询', 'UserName': '黄勇勇', 'CstName': '马哥', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 380000000, 'minutes': 38, 'time': 1439462310380, 'seconds': 30, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '17137349-A641-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': '1A137349-A641-E511-B354-90B11C289D6E', 'UserGUID': '46EF95D9-C808-E511-B354-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '15086451161', 'v_rownum': 4, 'Status': '问询', 'UserName': '周丽琴', 'CstName': '张姐', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 300000000, 'minutes': 30, 'time': 1439461825300, 'seconds': 25, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}, {'BUGUID': '6CC0000A-7C97-E311-9B75-90B11C289D6E', 'CstGUID': '9EE66975-A241-E511-B354-90B11C289D6E', 'HomeTel': '', 'OppGUID': 'A1E66975-A241-E511-B354-90B11C289D6E', 'UserGUID': '49B9070D-BD01-E411-9B75-90B11C289D6E', 'OfficeTel': '', 'MobileTel': '18748750678', 'v_rownum': 5, 'Status': '问询', 'UserName': '何彦学', 'CstName': '夏姐', 'ProjName': '紫藤庄园', 'CreatedOn': {'date': 13, 'hours': 18, 'timezoneOffset': -480, 'nanos': 20000000, 'minutes': 2, 'time': 1439460174020, 'seconds': 54, 'year': 115, 'day': 4, 'month': 7}, 'ProjGUID': 'DFF7E603-4B06-E311-A833-90B11C243E6D'}]
         #self.j_data = self.j_data[0:5]
         print(duan)
+        print(len(self.j_data))
+        print(len(self.data))
         for value in self.j_data[0:5]:
             print (value)
             print (duan)
@@ -244,11 +255,16 @@ class ProcessData(object):
     def __del__(self):
         del self.db
 
-if __name__ == "__main__":
+def get_data():
     pd = ProcessData()
-    url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2010-08-06&endDate=2015-8-10"
+    global url_template
+    url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2015-05-06&endDate=2015-8-10"
     pd.process(rc_parameters)
-    pd.process(qy_parameters)
-    url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1"
     pd.process(rg_parameters)
-    #pd.process(kf_parameters)
+    pd.process(qy_parameters)
+    pd.process(kf_parameters)
+
+if __name__ == "__main__":
+    from timeit import Timer
+    t1=Timer("get_data()","from __main__ import get_data")
+    print(t1.timeit(1))

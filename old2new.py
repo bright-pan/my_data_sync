@@ -56,7 +56,11 @@ class DB(object):
                         pass
                     else:
                         if not cols_attr['Type'].find("date"):
-                            value = datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
+                            #print(cols_attr)
+                            if isinstance(value, datetime.datetime):
+                                value = value.strftime("%Y-%m-%d %H:%M:%S")
+                            else:
+                                value = datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
                         #sql += "%s='%s'," % (key, value)
                         sql_key += "`%s`," % key
                         if isinstance(value, str):
