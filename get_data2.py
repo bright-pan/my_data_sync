@@ -34,6 +34,37 @@ class DB(object):
                 #print(sql)
                 self.cur.execute(sql)
             self.conn.commit()
+    def update_cityname_info(self):
+        from urllib.request import urlopen
+        import re
+        import json
+        # get html source code for url
+
+        def getPageCode(url):
+            #print(url)
+            file = urlopen(url)
+            #text = file.read().decode('gbk',"ignore").encode('utf-8').decode('utf-8').split(");")[0][1:].replace("{","{\"").replace(":","\":").replace(",",",\"").replace("'","\"")
+            data = json.loads(file.read().decode('utf-8'))
+            print(data)
+            temp = {}
+            if data['result']:
+                temp = data['result']
+                return temp
+            temp['province'] = ""
+            temp['city'] = ""
+            return temp
+            #{"resultcode":"200","reason":"Return Successd!","result":{"province":"广东","city":"深圳","areacode":"0755","zip":"518000","company":"中国联通","card":"广东联通GSM卡"},"error_code":0}
+            #print(text)
+
+        self.cur.execute("select * from yehnet_user where jjr_province = '' or jjr_city = ''")
+        result = self.cur.fetchall()
+        for each in result:#48f58476b4064abbf074628b0f8afbea
+            #f3478a7d16ee4913dcbf339f296f95a2
+            url = "http://apis.juhe.cn/mobile/get?key=f3478a7d16ee4913dcbf339f296f95a2&dtype=json&phone=%s" % each['phone']
+            temp = getPageCode(url)
+            sql = "update yehnet_user set `jjr_province` =  \"%s\",`jjr_city` =  \"%s\" where id = %d" % (temp['province'], temp['city'], each['id'])
+            print(sql)
+            self.cur.execute(sql)
 
     def insert_user_data(self, data, to_table = "", map_dict={}):
         #self.cur.execute("delete from %s" % table_name)
@@ -45,10 +76,16 @@ class DB(object):
                  temp[each['cellphone']] = each['id']
 
         for each in data:
+            #78749A07-7297-E311-9B75-90B11C289D6E
+            print(each)
             #sql = "update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName'])UserGUID
-
-            self.cur.execute("update yehnet_admin set `UserGUID` =  \"%s\" where username LIKE \"%%%s%%\"" % (each['UserGUID'], each['UserName']))
-            self.cur.execute("update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName']))
+            try:
+                self.cur.execute("update yehnet_admin set `UserGUID` =  \"%s\" where username LIKE \"%%%s%%\"" % (each['UserGUID'], each['UserName']))
+                self.cur.execute("update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName']))
+            except pymysql.err.IntegrityError as e:
+                print(e)
+            except pymysql.err.ProgrammingError as e: #捕捉除0异常
+                print(e)
             result = temp.get(each['MobileTel'], None)
             if result:
                 sql = "update %s set " % to_table
@@ -118,15 +155,17 @@ class DB(object):
                         # else:
                         #     sql += "`%s` = \"%s\"," % (key, value)
                 sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
-            try:
-                # print(sql)
-                self.cur.execute(sql)
-            except pymysql.err.IntegrityError as e:
-                print(e)
-                #print(sql)
-            except pymysql.err.ProgrammingError as e: #捕捉除0异常
-                print(e)
+
+
+        try:
+            #print(sql)
+            self.cur.execute(sql)
+        except pymysql.err.IntegrityError as e:
+            print(e)
+        except pymysql.err.ProgrammingError as e: #捕捉除0异常
+            print(e)
         self.conn.commit()
+
     def insert_status_data(self, data, to_table = "", map_dict={}, s_type=0):
         self.cur.execute("delete from %s where type = %d" % (to_table, s_type))
         for each in data:
@@ -141,7 +180,7 @@ class DB(object):
             for from_cols, to_cols in map_dict.items():
                 #print(from_cols,to_cols)
                 key = to_cols[1]
-                value = each[from_cols]
+                value = each.get(from_cols,'NULL')
                 if value is None:
                     pass
                 else:
@@ -186,7 +225,7 @@ rc_parameters = {
     'key' : "9C9F73DC8D821F4861D0D0C2038F2CB1",
     "type":2,
     'table_name':"yehnet_customer_status",
-    'map_dict' : {"ProjName":(2,"type",2), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),
+    'map_dict' : {"v_rownum":(2,"type",2), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"ProjName":(0,"ProjName"),
                   "CreatedOn":(4,"add_time"),"CardID":(0,"CardID"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"BookingGUID":(0,"BookingGUID"),
                   "CloseDate":(4,"CloseDate"),"CloseYy":(0,"CloseYy")}
 }
@@ -194,8 +233,8 @@ rg_parameters = {
     'key' : "947A80532AD54B83F7674B8B7AAAF436",
     "type":3,
     'table_name':"yehnet_customer_status",
-    'map_dict' : {"v_rownum":(2,"type",3), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"ProjName":(41,"add_time","QSDate"),
-                  "OrderGUID":(0,"OrderGUID"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"TradeGUID":(0,"TradeGUID"),
+    'map_dict' : {"v_rownum":(2,"type",3), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"r_asdfasdfsadf":(41,"add_time","QSDate"),"ProjName":(0,"ProjName"),
+                  "OrderGUID":(0,"OrderGUID"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"TradeGUID":(0,"TradeGUID"),"PotocolNO":(0,"PotocolNO"),
                   "RoomGUID":(0,"RoomGUID"),"Roominfo":(0,"Roominfo"),"BldName":(0,"BldName"),"Roominfo":(0,"Roominfo"),"Room":(0,"Room"),"BldArea":(0,"BldArea"),
                   "TnArea":(0,"TnArea"),"PayformName":(0,"PayformName"),"QSDate":(4,"QSDate"),"CjTotal":(0,"CjTotal"),"OrderType":(0,"OrderType"),"CloseReason":(0,"CloseReason")}
 }
@@ -203,8 +242,8 @@ qy_parameters = {
     'key' : "654A7B61CAACC62BC4770ABC8BB7DA56",
     "type":4,
     'table_name':"yehnet_customer_status",
-    'map_dict' : {"v_rownum":(2,"type",4), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"ProjName":(41,"add_time","QSDate"),
-                  "ContractGUID":(0,"ContractGUID"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"TradeGUID":(0,"TradeGUID"),
+    'map_dict' : {"v_rownum":(2,"type",4), "CstGUID":(0,"CstGUID"),"Status":(0,"status"),"r_asdfasdfsadf":(41,"add_time","QSDate"),"ProjName":(0,"ProjName"),
+                  "ContractGUID":(0,"ContractGUID"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"TradeGUID":(0,"TradeGUID"),"ContractNO":(0,"ContractNO"),
                   "RoomGUID":(0,"RoomGUID"),"Roominfo":(0,"Roominfo"),"BldName":(0,"BldName"),"Roominfo":(0,"Roominfo"),"Room":(0,"Room"),"BldArea":(0,"BldArea"),
                   "TnArea":(0,"TnArea"),"PayformName":(0,"PayformName"),"QSDate":(4,"QSDate"),"HtTotal":(0,"HtTotal"),"CloseReason":(0,"CloseReason")}
 }
@@ -216,7 +255,7 @@ kf_parameters = {
                   "CreatedOn":(4,"add_time"),"ProjName":(0,"ProjName"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"OppGUID":(0,"OppGUID"),
                   "UserGUID":(0,"UserGUID"),"UserName":(0,"GWName")}
 }
-db_name = 'test'
+db_name = 'new'
 
 #利用urllib2获取网络数据
 class ProcessData(object):
@@ -259,11 +298,11 @@ def get_data():
     pd = ProcessData()
     global url_template
     url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2015-05-06&endDate=2015-8-10"
-    pd.process(rc_parameters)
-    pd.process(rg_parameters)
-    pd.process(qy_parameters)
-    pd.process(kf_parameters)
-
+    #pd.process(rc_parameters)
+    #pd.process(rg_parameters)
+    #pd.process(qy_parameters)
+    #pd.process(kf_parameters)
+    pd.db.update_cityname_info()
 if __name__ == "__main__":
     from timeit import Timer
     t1=Timer("get_data()","from __main__ import get_data")
