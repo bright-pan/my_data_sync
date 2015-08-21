@@ -27,11 +27,20 @@ class DB(object):
         self.new_cur = self.new_conn.cursor()
         self.old_cur = self.old_conn.cursor()
 
+    def db_clear_data(self):
+        self.new_cur.execute("show tables")
+        qs_new = self.new_cur.fetchall()
+        print(qs_new)
+        for each in qs_new:
+            self.new_cur.execute("truncate %s" % each['Tables_in_new'])
+            self.new_conn.commit()
+
     def db_commit(self):
         self.new_conn.commit()
         self.old_conn.commit()
 
     def table_copy_process(self, new_table="", old_table=""):
+
         result = self.new_cur.execute("show columns from %s" % new_table)
         qs_new = self.new_cur.fetchall()
         new_cols = {}
@@ -81,6 +90,7 @@ class DB(object):
         self.db_commit()
 
     def db_copy_process(self):
+        self.db_clear_data()
         result = self.new_cur.execute("show tables")
         new_tables = self.new_cur.fetchall()
         new_tables_list = []
@@ -132,10 +142,11 @@ class DB(object):
                         sql += "`%s` = \"%s\"," % (key, pymysql.escape_string(value))
                     else:
                         sql += "`%s` = \"%s\"," % (key, value)
-            sql = sql[:-1] + " WHERE `%s` = \"%s\"" % (where_condition[1], where_condition[0])
+            sql = sql[:-1] + " WHERE `%s` = \"%s\"" % (where_condition[1], each[where_condition[0]])
             try:
-                self.new_cur.execute(sql)
                 #print(sql)
+                self.new_cur.execute(sql)
+
             except pymysql.err.IntegrityError as e:
                 pass
                 #print(e)
@@ -233,5 +244,13 @@ if __name__ == "__main__":
     to_table = "yehnet_customer_status"
     map_dict = {"yehnet_customer.id":(0,"c_id"), "uid":(0,"u_id"), "guwenid":(0,"a_id"),"yehnet_list.id":(0,"p_id"), "type":(0,"type"), "note":(0,"remark"),"yehnet_customer.status":(0,"status"), "add_time":(1,"add_time")}
     db.process_insert(from_table,to_table,map_dict, "left JOIN yehnet_customer ON yehnet_customer_log.customer_id = yehnet_customer.id left JOIN yehnet_list ON yehnet_list.title = yehnet_customer.proname")
-    #db.db_copy_process()
-    #db.db_commit()
+
+    from_table = "yehnet_user"
+    to_table = "yehnet_user"
+    map_dict = {"regdate":(3,"add_time")}
+    db.process_update(from_table,to_table,map_dict, ('id','id'))
+
+    # from_table = "yehnet_user_bk"
+    # to_table = "yehnet_user"
+    # map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
+    # db.process_update(from_table,to_table,map_dict, ('phone','phone'))

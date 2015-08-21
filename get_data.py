@@ -17,8 +17,17 @@ class DB(object):
         self.cur = self.conn.cursor()
 
     def insert_data(self, data, table_name = ""):
-        self.cur.execute("delete from %s" % table_name)
+        self.cur.execute("drop table IF EXISTS %s" % table_name)
         if type(data) is list:
+            sql = "CREATE TABLE `%s` (" % table_name
+            sql_2 = ") ENGINE=MyISAM AUTO_INCREMENT=174 DEFAULT CHARSET=utf8"
+            t = data[0].keys()
+            a = ""
+            for each in t:
+                a += "`%s` varchar(100) DEFAULT NULL," % each
+            sql = sql + a[:-1] + sql_2
+            self.cur.execute(sql)
+            self.conn.commit()
             for d in data:
                 sql = "INSERT INTO %s set " % table_name
                 for key, value in d.items():
@@ -36,7 +45,7 @@ class DB(object):
     def __del__(self):
         self.conn.close()
 
-url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1"
+url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2013-08-09&endDate=2015-8-20"
 api_token = "DBA7AEF165F514232423999B6B81EA63";
 rc_parameters = {
     'key' : "9C9F73DC8D821F4861D0D0C2038F2CB1",
@@ -70,23 +79,23 @@ class ProcessData(object):
         except Exception as e:
             print(e)
         #写入文件
-        file = open("%s.txt" % parameters['table_name'],"w")
-        file.write(self.data)
-        file.close()
+        # file = open("%s.txt" % parameters['table_name'],"w")
+        # file.write(self.data)
+        # file.close()
         #解析从网络上获取的JSON数据
         self.j_data = json.loads(self.data)
         print(duan)
         for value in self.j_data[0:5]:
             print (value)
             print (duan)
-        self.db.insert_data(self.j_data[0:5],table_name=parameters['table_name'])
+        self.db.insert_data(self.j_data,table_name=parameters['table_name'])
 
     def __del__(self):
         del self.db
 
 if __name__ == "__main__":
     pd = ProcessData()
-    #pd.process(rc_parameters)
-    #pd.process(rg_parameters)
-    #pd.process(qy_parameters)
+    pd.process(rc_parameters)
+    pd.process(rg_parameters)
+    pd.process(qy_parameters)
     pd.process(kf_parameters)
