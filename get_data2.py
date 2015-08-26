@@ -238,7 +238,7 @@ class DB(object):
         self.new_conn.commit()
 
     def insert_commission_data(self, data ={}, to_table = "", map_dict={}, s_type=0):
-        self.new_cur.execute("select ycs.c_id, ycs.u_id, yc.cellphone, yc.username, ycs.ProjName, ycs.RoomGUID, ycs.CstGUID, ycs.Roominfo, ycs.ContractNO, yl.yongjin from yehnet_customer_status ycs left join yehnet_customer yc on yc.id = ycs.c_id left join yehnet_list yl on yl.id = ycs.p_id where ycs.type = 4 and ycs.status = '激活' and (ycs.c_id != 0 and ycs.c_id != '' and ycs.u_id != 0 and ycs.u_id != '' and ycs.ContractNO != '')  group by ycs.id ")
+        self.new_cur.execute("select ycs.c_id, ycs.u_id, yc.cellphone, yc.username, ycs.ProjName, ycs.RoomGUID, ycs.CstGUID, ycs.Roominfo, ycs.ContractNO, yl.yongjin from yehnet_customer_status ycs left join yehnet_customer yc on yc.id = ycs.c_id left join yehnet_list yl on yl.id = ycs.p_id where ycs.type = 4 and ycs.status = '激活' and (ycs.c_id != 0 and ycs.c_id != '' and ycs.u_id != 0 and ycs.u_id != 41 and ycs.u_id != '' and ycs.ContractNO != '')  group by ycs.id ")
         data = self.new_cur.fetchall()
         print(data)
         for each in data:
@@ -296,12 +296,6 @@ class DB(object):
     def process_invalid_data(self):
         try:
             # print(sql)
-
-            self.new_cur.execute("update yehnet_customer_user set status = '3' where status = '2';")
-            self.new_cur.execute("update yehnet_customer_user set status = '2' where status = '1';")
-            self.new_cur.execute("update yehnet_customer_user set status = '1' where status = '0';")
-            self.new_cur.execute("delete from yehnet_customer_admin where a_id = 0")
-            self.new_cur.execute("delete from yehnet_customer_user where u_id = 0")
             self.new_cur.execute("update yehnet_customer_status ycs , yehnet_customer yc set ycs.c_id = yc.id  where ycs.CstGUID = yc.CstGUID and ycs.type != 1")
             self.new_cur.execute("update yehnet_customer_status ycs , yehnet_customer_user ycu set ycs.u_id = ycu.u_id  where ycs.c_id = ycu.c_id and ycs.type != 1")
             self.new_cur.execute("update yehnet_customer_status ycs , yehnet_customer_project ycp set ycs.p_id = ycp.p_id  where ycs.c_id = ycp.c_id and ycs.type != 1")
@@ -455,7 +449,7 @@ kf_parameters = {
     "type":0,
     'table_name':"yehnet_customer",
     'map_dict' : {"HomeTel":(0,"hometel"), "MobileTel":(0,"cellphone"), "OfficeTel":(0,"officetel"), "CstName":(0,"username"), "CstGUID":(0,"CstGUID"),#"Status":(0,"Status"),
-                  "CreatedOn":(4,"add_time"),"ProjName":(5,"ProjName"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),"OppGUID":(0,"OppGUID"),
+                  "CreatedOn":(4,"add_time"),"ProjName":(5,"ProjName"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),
                   "UserGUID":(0,"UserGUID"),"UserName":(0,"GWName")}
 }
 new_db_name = 'new'
@@ -502,21 +496,21 @@ def get_data():
     pd = ProcessData()
     global url_template
     url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2013-05-06&endDate=2015-8-19"
-    # pd.process(rc_parameters)
-    # pd.process(rg_parameters)
-    # pd.process(qy_parameters)
-    # pd.process(kf_parameters)
-    # from_table = "yehnet_user_bk"
-    # to_table = "yehnet_user"
-    # map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
-    # pd.db.process_update(from_table,to_table,map_dict, ('phone','phone'))
-    # pd.db.update_cityname_info()
-    # pd.db.process_invalid_data()
+    pd.process(rc_parameters)
+    pd.process(rg_parameters)
+    pd.process(qy_parameters)
+    pd.process(kf_parameters)
+    from_table = "yehnet_user_bk"
+    to_table = "yehnet_user"
+    map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
+    pd.db.process_update(from_table,to_table,map_dict, ('phone','phone'))
+    pd.db.update_cityname_info()
+    pd.db.process_invalid_data()
 
-    # from_table = "yehnet_commission"
-    # to_table = "yehnet_commission"
-    # map_dict = {"c_id":(0,"c_id"),"u_id":(0,"u_id"),"cellphone":(0,"cellphone"), "CstGUID":(0,"CstGUID"),"ContractNO":(0,"ContractNO"), "ProjName":(0,"ProjName"), "yongjin":(0,"money"), "username":(0,"username"), "RoomGUID":(0,"RoomGUID"), "Roominfo":(0,"Roominfo"),"status":(2,"status", 1), "add_time":(3,"add_time")}
-    # pd.db.insert_commission_data(from_table, to_table, map_dict=map_dict)
+    from_table = "yehnet_commission"
+    to_table = "yehnet_commission"
+    map_dict = {"c_id":(0,"c_id"),"u_id":(0,"u_id"),"cellphone":(0,"cellphone"), "CstGUID":(0,"CstGUID"),"ContractNO":(0,"ContractNO"), "ProjName":(0,"ProjName"), "yongjin":(0,"money"), "username":(0,"username"), "RoomGUID":(0,"RoomGUID"), "Roominfo":(0,"Roominfo"),"status":(2,"status", 1), "add_time":(3,"add_time")}
+    pd.db.insert_commission_data(from_table, to_table, map_dict=map_dict)
 
     from_table = "yehnet_customer_user"
     to_table = "yehnet_customer_user"

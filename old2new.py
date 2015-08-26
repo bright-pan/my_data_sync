@@ -215,6 +215,22 @@ class DB(object):
             except pymysql.err.ProgrammingError as e: #捕捉除0异常
                 print(e)
         self.db_commit()
+    def process_invalid_data(self):
+        try:
+            # print(sql)
+
+            self.new_cur.execute("update yehnet_customer_user set status = '3' where status = '2';")
+            self.new_cur.execute("update yehnet_customer_user set status = '2' where status = '1';")
+            self.new_cur.execute("update yehnet_customer_user set status = '1' where status = '0';")
+            #self.new_cur.execute("delete from yehnet_customer_admin where a_id = 0")
+            #self.new_cur.execute("delete from yehnet_customer_user where u_id = 0")
+        except pymysql.err.IntegrityError as e:
+            print(e)
+            #print(sql)
+        except pymysql.err.ProgrammingError as e: #捕捉除0异常
+            print(e)
+        self.new_conn.commit()
+
     def __del__(self):
         self.new_conn.close()
         self.old_conn.close()
@@ -250,7 +266,9 @@ if __name__ == "__main__":
     map_dict = {"regdate":(3,"add_time")}
     db.process_update(from_table,to_table,map_dict, ('id','id'))
 
-    # from_table = "yehnet_user_bk"
-    # to_table = "yehnet_user"
-    # map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
-    # db.process_update(from_table,to_table,map_dict, ('phone','phone'))
+    from_table = "yehnet_user_bk"
+    to_table = "yehnet_user"
+    map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
+    db.process_update(from_table,to_table,map_dict, ('phone','phone'))
+
+    #db.process_invalid_data()

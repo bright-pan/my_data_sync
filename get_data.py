@@ -45,7 +45,7 @@ class DB(object):
     def __del__(self):
         self.conn.close()
 
-url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2000-08-09&endDate=2015-8-20"
+url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2000-08-09&endDate=2015-8-26"
 api_token = "DBA7AEF165F514232423999B6B81EA63";
 rc_parameters = {
     'key' : "9C9F73DC8D821F4861D0D0C2038F2CB1",
