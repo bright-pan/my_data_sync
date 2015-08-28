@@ -254,7 +254,7 @@ if __name__ == "__main__":
     db.process_insert(from_table,to_table,map_dict, "left JOIN yehnet_list ON yehnet_list.title = yehnet_customer.proname")
     from_table = "yehnet_customer"
     to_table = "yehnet_customer_user"
-    map_dict = {"id":(0,"c_id"), "uid":(0,"u_id"),"yongjin":(0,"commission"),"status":(0,"status"), "add_time":(3,"add_time")}
+    map_dict = {"id":(0,"c_id"), "uid":(0,"u_id"),"yongjin":(0,"commission"),"status":(0,"status"), "add_time":(0,"add_time")}
     db.process_insert(from_table,to_table,map_dict, "left JOIN yehnet_list ON yehnet_list.title = yehnet_customer.proname")
     from_table = "yehnet_customer_log"
     to_table = "yehnet_customer_status"
@@ -271,4 +271,4 @@ if __name__ == "__main__":
     map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
     db.process_update(from_table,to_table,map_dict, ('phone','phone'))
 
-    #db.process_invalid_data()
+    db.process_invalid_data()

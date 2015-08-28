@@ -62,7 +62,7 @@ class DB(object):
         result = self.new_cur.fetchall()
         for each in result:#48f58476b4064abbf074628b0f8afbea
             #f3478a7d16ee4913dcbf339f296f95a2
-            url = "http://apis.juhe.cn/mobile/get?key=f3478a7d16ee4913dcbf339f296f95a2&dtype=json&phone=%s" % each['phone']
+            url = "http://apis.juhe.cn/mobile/get?key=48f58476b4064abbf074628b0f8afbea&dtype=json&phone=%s" % each['phone']
             temp = getPageCode(url)
             sql = "update yehnet_user set `jjr_province` =  \"%s\",`jjr_city` =  \"%s\" where id = %d" % (temp['province']+'省', temp['city']+'市', each['id'])
             print(sql)
@@ -238,7 +238,7 @@ class DB(object):
         self.new_conn.commit()
 
     def insert_commission_data(self, data ={}, to_table = "", map_dict={}, s_type=0):
-        self.new_cur.execute("select ycs.c_id, ycs.u_id, yc.cellphone, yc.username, ycs.ProjName, ycs.RoomGUID, ycs.CstGUID, ycs.Roominfo, ycs.ContractNO, yl.yongjin from yehnet_customer_status ycs left join yehnet_customer yc on yc.id = ycs.c_id left join yehnet_list yl on yl.id = ycs.p_id where ycs.type = 4 and ycs.status = '激活' and (ycs.c_id != 0 and ycs.c_id != '' and ycs.u_id != 0 and ycs.u_id != 41 and ycs.u_id != '' and ycs.ContractNO != '')  group by ycs.id ")
+        self.new_cur.execute("select ycs.c_id, ycs.u_id, yc.cellphone, yc.username, ycs.add_time, ycs.ProjName, ycs.RoomGUID, ycs.CstGUID, ycs.Roominfo, ycs.ContractNO, yl.yongjin from yehnet_customer_status ycs left join yehnet_customer yc on yc.id = ycs.c_id left join yehnet_list yl on yl.id = ycs.p_id where ycs.type = 4 and ycs.status = '激活' and (ycs.c_id != 0 and ycs.c_id != '' and ycs.u_id != 0 and ycs.u_id != 41 and ycs.u_id != '' and ycs.ContractNO != '')  group by ycs.id ")
         data = self.new_cur.fetchall()
         print(data)
         for each in data:
@@ -416,6 +416,78 @@ class DB(object):
                 print(e)
         self.new_conn.commit()
 
+    def insert_my_customer_project(self, data ={}, to_table = "", map_dict={}, s_type=0):
+        self.new_cur.execute("select * from yehnet_list where module_id = 3 and cate_id = 0")
+        data = self.new_cur.fetchall()
+        project_map = {}
+        for each in data:
+            project_map[each['title']] = each['id']
+        print(project_map)
+        self.new_conn.commit()
+        self.new_cur.execute("delete FROM yehnet_customer_project where p_id = 0")
+        self.new_conn.commit()
+        self.new_cur.execute("select * from yehnet_customer yc left join yehnet_customer_project ycp on ycp.c_id = yc.id where ycp.p_id = 0 or ycp.p_id is null")
+        data = self.new_cur.fetchall()
+        print(data[0])
+        for each in data:
+            #sql = "update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName'])UserGUID
+
+            #self.new_cur.execute("update yehnet_admin set `UserGUID` =  \"%s\" where username LIKE \"%%%s%%\"" % (each['UserGUID'], each['UserName']))
+            #self.new_cur.execute("update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName']))
+
+            #print(list(map(f,list(each.keys()))))
+            sql_key = ""
+            sql_value = ""
+            for from_cols, to_cols in map_dict.items():
+                print(from_cols,to_cols)
+                key = to_cols[1]
+                value = each.get(from_cols,'NULL')
+                if value is None:
+                    pass
+                else:
+                    if to_cols[0] is 1:
+                        if isinstance(value, str):
+                            value = int(value)
+                        value = datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
+                    if to_cols[0] is 2:
+                        value = to_cols[2]
+                    if to_cols[0] is 3:
+                        value = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    if to_cols[0] is 4:
+                        value = "%s-%s-%s %s:%s:%s" % (value['year']+1900, value["month"]+1, value['date'], value["hours"], value['minutes'], value['seconds'])
+                    if to_cols[0] is 41:
+                        value = each[to_cols[2]]
+                        value = "%s-%s-%s %s:%s:%s" % (value['year']+1900, value["month"]+1, value['date'], value["hours"], value['minutes'], value['seconds'])
+                    if to_cols[0] is 5:
+                        projname_map = {"丁香雅苑":"玫瑰庄园"}
+                        if value in projname_map:
+                            value = projname_map[value]
+                    if to_cols[0] is 6:
+                        for title, id in project_map.items():
+                            print(title, id ,value)
+                            print('*************')
+                            if value in title:
+                                value = id
+                                break
+                    sql_key += "`%s`," % key
+                    if isinstance(value, str):
+                        sql_value += "\"%s\"," % pymysql.escape_string(value)
+                    else:
+                        sql_value += "\"%s\"," % value
+                    # if isinstance(value, str):
+                    #     sql += "`%s` = \"%s\"," % (key, pymysql.escape_string(value))
+                    # else:
+                    #     sql += "`%s` = \"%s\"," % (key, value)
+            sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
+            try:
+                print(sql)
+                self.new_cur.execute(sql)
+            except pymysql.err.IntegrityError as e:
+                print(e)
+                #print(sql)
+            except pymysql.err.ProgrammingError as e: #捕捉除0异常
+                print(e)
+        self.new_conn.commit()
 url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2010-08-06&endDate=2015-8-10"
 api_token = "DBA7AEF165F514232423999B6B81EA63";
 rc_parameters = {
@@ -495,7 +567,7 @@ class ProcessData(object):
 def get_data():
     pd = ProcessData()
     global url_template
-    url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2013-05-06&endDate=2015-8-19"
+    url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2000-05-06&endDate=2015-8-28"
     pd.process(rc_parameters)
     pd.process(rg_parameters)
     pd.process(qy_parameters)
@@ -509,13 +581,18 @@ def get_data():
 
     from_table = "yehnet_commission"
     to_table = "yehnet_commission"
-    map_dict = {"c_id":(0,"c_id"),"u_id":(0,"u_id"),"cellphone":(0,"cellphone"), "CstGUID":(0,"CstGUID"),"ContractNO":(0,"ContractNO"), "ProjName":(0,"ProjName"), "yongjin":(0,"money"), "username":(0,"username"), "RoomGUID":(0,"RoomGUID"), "Roominfo":(0,"Roominfo"),"status":(2,"status", 1), "add_time":(3,"add_time")}
+    map_dict = {"c_id":(0,"c_id"),"u_id":(0,"u_id"),"cellphone":(0,"cellphone"), "CstGUID":(0,"CstGUID"),"ContractNO":(0,"ContractNO"), "ProjName":(0,"ProjName"), "yongjin":(0,"money"), "username":(0,"username"), "RoomGUID":(0,"RoomGUID"), "Roominfo":(0,"Roominfo"),"status":(2,"status", 1), "add_time":(0,"add_time"), "update_time":(3,"update_time")}
     pd.db.insert_commission_data(from_table, to_table, map_dict=map_dict)
 
     from_table = "yehnet_customer_user"
     to_table = "yehnet_customer_user"
     map_dict = {"id":(0,"c_id"),"u_iddfdf":(2,"u_id",41),"statusdff":(2,"status", 2),"is_jjrdfdf":(2,"is_jjr", 1),"commissiondfdf":(2,"commission", 0), "add_time":(3,"add_time")}
     pd.db.insert_default_user_for_customer(from_table, to_table, map_dict=map_dict)
+    from_table = "yehnet_customer_project"
+    to_table = "yehnet_customer_project"
+    map_dict = {"id":(0,"c_id"),"ProjName":(6,"p_id", 2),"statusasfasf":(2,"status", 1),"add_time":(3,"add_time")}
+    pd.db.insert_my_customer_project(from_table, to_table, map_dict=map_dict)
+
 if __name__ == "__main__":
     from timeit import Timer
     t1=Timer("get_data()","from __main__ import get_data")
