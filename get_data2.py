@@ -13,11 +13,9 @@ from timeit import Timer
 duan ="--------------------------"	#在控制台断行区别的
 
 class DB(object):
-    def __init__(self, host="localhost", user="root", passwd="", new_db="", old_db="",charset="utf-8"):
+    def __init__(self, host="localhost", user="root", passwd="", new_db="",charset="utf-8"):
         self.new_conn=pymysql.connect(host=host,user=user,passwd=passwd,db=new_db,charset=charset, cursorclass=pymysql.cursors.DictCursor)
         self.new_cur = self.new_conn.cursor()
-        self.old_conn=pymysql.connect(host=host,user=user,passwd=passwd,db=old_db,charset=charset, cursorclass=pymysql.cursors.DictCursor)
-        self.old_cur = self.old_conn.cursor()
 
     def insert_data(self, data, table_name = ""):
         self.new_cur.execute("delete from %s" % table_name)
@@ -59,6 +57,7 @@ class DB(object):
             #print(text)
 
         self.new_cur.execute("select * from yehnet_user where jjr_province = '' or jjr_city = ''")
+        print("-----------")
         result = self.new_cur.fetchall()
         for each in result:#48f58476b4064abbf074628b0f8afbea
             #f3478a7d16ee4913dcbf339f296f95a2
@@ -172,12 +171,14 @@ class DB(object):
 
 
             try:
-                #print(sql)
+                print(sql)
                 self.new_cur.execute(sql)
-
+                print("------------")
             except pymysql.err.IntegrityError as e:
+
                 print(e)
             except pymysql.err.ProgrammingError as e: #捕捉除0异常
+                print(sql)
                 print(e)
         self.new_conn.commit()
 
@@ -300,7 +301,7 @@ class DB(object):
             self.new_cur.execute("update yehnet_customer_status ycs , yehnet_customer_user ycu set ycs.u_id = ycu.u_id  where ycs.c_id = ycu.c_id and ycs.type != 1")
             self.new_cur.execute("update yehnet_customer_status ycs , yehnet_customer_project ycp set ycs.p_id = ycp.p_id  where ycs.c_id = ycp.c_id and ycs.type != 1")
             self.new_cur.execute("update yehnet_customer_status ycs , yehnet_customer_admin yca set ycs.a_id = yca.a_id  where ycs.c_id = yca.c_id and ycs.type != 1")
-            self.new_cur.execute(r"delete from yehnet_customer_user  where id in (select id from (select  max(id) as id,count(c_id) as count from yehnet_customer_user group by c_id having count >1 order by count desc) as tab")
+            self.new_cur.execute("delete from yehnet_customer_user  where id in (select id from (select  max(id) as id,count(c_id) as count from yehnet_customer_user group by c_id having count >1 order by count desc) as tab)")
         except pymysql.err.IntegrityError as e:
             print(e)
             #print(sql)
@@ -311,7 +312,6 @@ class DB(object):
         self.new_conn.close()
     def db_commit(self):
         self.new_conn.commit()
-        self.old_conn.commit()
 
     def process_update(self, from_table='yehnet_sales', to_table="yehnet_admin", set_dict={}, where_condition=("adminid","id")):
         map_dict = {"username":(0,"username"),
@@ -428,7 +428,7 @@ class DB(object):
         self.new_conn.commit()
         self.new_cur.execute("select * from yehnet_customer yc left join yehnet_customer_project ycp on ycp.c_id = yc.id where ycp.p_id = 0 or ycp.p_id is null")
         data = self.new_cur.fetchall()
-        print(data[0])
+        #print(data[0])
         for each in data:
             #sql = "update yehnet_list set `ProjGUID` =  \"%s\" where module_id = 3 and title LIKE \"%%%s%%\"" % (each['ProjGUID'], each['ProjName'])UserGUID
 
@@ -439,7 +439,7 @@ class DB(object):
             sql_key = ""
             sql_value = ""
             for from_cols, to_cols in map_dict.items():
-                print(from_cols,to_cols)
+                #print(from_cols,to_cols)
                 key = to_cols[1]
                 value = each.get(from_cols,'NULL')
                 if value is None:
@@ -464,8 +464,8 @@ class DB(object):
                             value = projname_map[value]
                     if to_cols[0] is 6:
                         for title, id in project_map.items():
-                            print(title, id ,value)
-                            print('*************')
+                            #print(title, id ,value)
+                            #print('*************')
                             if value in title:
                                 value = id
                                 break
@@ -480,7 +480,7 @@ class DB(object):
                     #     sql += "`%s` = \"%s\"," % (key, value)
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
             try:
-                print(sql)
+                #print(sql)
                 self.new_cur.execute(sql)
             except pymysql.err.IntegrityError as e:
                 print(e)
@@ -488,7 +488,7 @@ class DB(object):
             except pymysql.err.ProgrammingError as e: #捕捉除0异常
                 print(e)
         self.new_conn.commit()
-url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2010-08-06&endDate=2015-8-10"
+
 api_token = "DBA7AEF165F514232423999B6B81EA63";
 rc_parameters = {
     'key' : "9C9F73DC8D821F4861D0D0C2038F2CB1",
@@ -524,23 +524,45 @@ kf_parameters = {
                   "CreatedOn":(4,"add_time"),"ProjName":(5,"ProjName"),"BUGUID":(0,"BUGUID"),"ProjGUID":(0,"ProjGUID"),
                   "UserGUID":(0,"UserGUID"),"UserName":(0,"GWName")}
 }
-new_db_name = 'new'
-old_db_name = 'old'
+import sys
+if (len(sys.argv) >= 3):
+    day = int(sys.argv[1])
+    new_db_name = str(sys.argv[2])
+    user = str(sys.argv[3])
+    passwd = str(sys.argv[4])
+else:
+    day = 3
+    new_db_name = 'new'
+    user="root"
+    passwd=""
+
+now = datetime.datetime.now()
+starttime = now - datetime.timedelta(days = day)
+
+now_string = now.strftime("%Y-%m-%d")
+start_string = starttime.strftime("%Y-%m-%d")
+
+user_agent = 'User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36 OPR/31.0.1889.174'
 
 #利用urllib2获取网络数据
 class ProcessData(object):
-    def __init__(self):
-        self.db = DB(new_db=new_db_name, old_db=old_db_name, charset="utf8")
+    def __init__(self, new_db= "new",user="root", passwd=""):
+        self.db = DB(new_db=new_db, user=user, passwd=passwd,charset="utf8")
 
     def process(self, parameters):
         #从网络上获取数据
-        try:
-            url = url_template % (parameters['key'], api_token)
-            # print(url)
-            self.data = urllib.request.urlopen(url).read().decode('utf-8')
-            # print(len(self.data[0)
-        except Exception as e:
-            print(e)
+        for i in range(5):
+            try:
+                url = url_template % (parameters['key'], api_token)
+                print(url)
+                self.data = urllib.request.urlopen(url)
+                self.data = self.data.read().decode('utf-8')
+                break
+                # print(len(self.data[0)
+            except Exception as e:
+                print(e)
+                continue
+
         # #写入文件
         # file = open("%s.txt" % parameters['table_name'],"w")
         # file.write(self.data)
@@ -564,13 +586,20 @@ class ProcessData(object):
     def __del__(self):
         del self.db
 
+
+
+
 def get_data():
-    pd = ProcessData()
+    pd = ProcessData(new_db_name, user, passwd)
     global url_template
-    url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1&beginDate=2000-05-06&endDate=2015-8-28"
+    url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1" + '&beginDate=%s&endDate=%s' % (start_string, now_string)
     pd.process(rc_parameters)
+    import time
+    time.sleep(5)
     pd.process(rg_parameters)
+    time.sleep(5)
     pd.process(qy_parameters)
+    time.sleep(5)
     pd.process(kf_parameters)
     from_table = "yehnet_user_bk"
     to_table = "yehnet_user"
