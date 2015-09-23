@@ -13,6 +13,7 @@ from timeit import Timer
 duan ="--------------------------"	#在控制台断行区别的
 
 class DB(object):
+
     def __init__(self, host="localhost", user="root", passwd="", new_db="",charset="utf-8"):
         self.new_conn=pymysql.connect(host=host,user=user,passwd=passwd,db=new_db,charset=charset, cursorclass=pymysql.cursors.DictCursor)
         self.new_cur = self.new_conn.cursor()
@@ -34,7 +35,9 @@ class DB(object):
                 #print(sql)
                 self.new_cur.execute(sql)
             self.new_conn.commit()
+
     def update_cityname_info(self):
+
         from urllib.request import urlopen
         import re
         import json
@@ -168,8 +171,6 @@ class DB(object):
                         # else:
                         #     sql += "`%s` = \"%s\"," % (key, value)
                 sql = "INSERT INTO %s (%s) VALUES (%s)" % (to_table,sql_key[:-1],sql_value[:-1])
-
-
             try:
                 print(sql)
                 self.new_cur.execute(sql)
@@ -239,7 +240,7 @@ class DB(object):
         self.new_conn.commit()
 
     def insert_commission_data(self, data ={}, to_table = "", map_dict={}, s_type=0):
-        self.new_cur.execute("select ycs.c_id, ycs.u_id, yc.cellphone, yc.username, ycs.add_time, ycs.ProjName, ycs.RoomGUID, ycs.CstGUID, ycs.Roominfo, ycs.ContractNO, yl.yongjin from yehnet_customer_status ycs left join yehnet_customer yc on yc.id = ycs.c_id left join yehnet_list yl on yl.id = ycs.p_id where ycs.type = 4 and ycs.status = '激活' and (ycs.c_id != 0 and ycs.c_id != '' and ycs.u_id != 0 and ycs.u_id != 41 and ycs.u_id != '' and ycs.ContractNO != '')  group by ycs.id ")
+        self.new_cur.execute("select ycs.c_id, ycs.u_id, yc.cellphone, yc.username, ycs.add_time, ycs.ProjName, ycs.RoomGUID, ycs.CstGUID, ycs.Roominfo, ycs.ContractNO, yl.yongjin from yehnet_customer_status ycs left join yehnet_customer yc on yc.id = ycs.c_id left join yehnet_list yl on yl.id = ycs.p_id where ycs.type = 4 and ycs.status = '激活' and (ycs.c_id != 0 and ycs.c_id != '' and ycs.u_id != 0 and ycs.u_id != 41 and ycs.u_id != '' and ycs.ContractNO != '')")
         data = self.new_cur.fetchall()
         print(data)
         for each in data:
@@ -532,7 +533,7 @@ if (len(sys.argv) >= 3):
     passwd = str(sys.argv[4])
 else:
     day = 3
-    new_db_name = 'new'
+    new_db_name = 'seedland-test'
     user="root"
     passwd=""
 
@@ -593,20 +594,21 @@ def get_data():
     pd = ProcessData(new_db_name, user, passwd)
     global url_template
     url_template = "http://api.seedland.cc/ws/json?key=%s&token=%s&dataOnly=1" + '&beginDate=%s&endDate=%s' % (start_string, now_string)
-    pd.process(rc_parameters)
+
     import time
+    pd.process(kf_parameters)
+    time.sleep(5)
+    pd.process(rc_parameters)
     time.sleep(5)
     pd.process(rg_parameters)
     time.sleep(5)
     pd.process(qy_parameters)
-    time.sleep(5)
-    pd.process(kf_parameters)
-    from_table = "yehnet_user_bk"
-    to_table = "yehnet_user"
-    map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
-    pd.db.process_update(from_table,to_table,map_dict, ('phone','phone'))
-    pd.db.update_cityname_info()
-    pd.db.process_invalid_data()
+    # from_table = "yehnet_user_bk"
+    # to_table = "yehnet_user"
+    # map_dict = {"jjr_city":(0,"jjr_city"), "jjr_province":(0,"jjr_province")}
+    # pd.db.process_update(from_table,to_table,map_dict, ('phone','phone'))
+    # pd.db.update_cityname_info()
+    # pd.db.process_invalid_data()
 
     from_table = "yehnet_commission"
     to_table = "yehnet_commission"
